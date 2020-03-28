@@ -1,66 +1,75 @@
 #define MIN_PID 100
 #define MAX_PID 1000
-//#define NO_OF_P 16 
+//#define NO_OF_P 16 			//here we can give the direct out put 
 #define ARR_SIZE MAX_PID-MIN_PID+1
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
 int pid_status[ARR_SIZE]={0};
-int allocate_map(void)        
+int allocate_map(void)        //initializing pid statuses 
 {
   int k;
   for(k=0;k<ARR_SIZE;k++)
   {
     pid_status[k]=0;
   }
-  return 0;               
+  return 0;               //return 0 indicating statuses have initialized.
 }
-int allocate_pid(void)
+int allocate_pid(void)		//function returns a free pid from the data structure
 {
     int k,count=1;
     for(k=0; k<ARR_SIZE; k++)
 
 {
-        if(pid_status[k]==0)
+        if(pid_status[k]==0)	//changes the status of  that pid to 1 on calling  from a thread
 	{
         pid_status[k]=1;
             count=0;
             break;
         }
     }
-    return count?-1:k;
+    return count?-1:k;			//returns -1 if unable to allocate a PID
 }
-void release_pid(int pid){  
+void release_pid(int pid)		/*function takes back the pid on calling from the thread.i.e., it changes the pid status of that pid back to 0.*/
+{  
     pid_status[pid]=0;
 }
-void *display(void *arg){
-    int thread_id =  *(( int* )arg);
+void *display(void *argument)		//i.e., it changes the pid status of that pid back to 0.
+{
+    int thread_id =  *(( int* )argument);
     int pid = allocate_pid();
     if(pid==-1){
-        printf("No PID available.");
+        printf("No PID available.");	//it will show that if there is no pid are available
     }
     else{
-        printf("Thread [%3d] PID [%3d] Allocated\n",thread_id,pid+MIN_PID);
-	int r=1+rand()%30;
+        printf("Thread [%3d] PID [%3d] Allocated\n",thread_id,pid+MIN_PID);//if pid are available then it will show the thread id 
+										//and pid allocated to which one 
+	
+	int r=1+rand()%30;	//sleep time formula 
 	release_pid(pid);
         printf("Thread [%3d] PID [%3d] Released after %d sec\n",thread_id,pid+MIN_PID,r);    
     }
     pthread_exit(NULL);
 }
 int main(){
-	int  NO_OF_P;
-  	printf("Enter no of threads: ");
- 	 scanf("%d",&NO_OF_P);               
+	int  NOOFTHREADS;		// declaring the no of threads 
+  	printf("Enter no of threads: ");	//asking the user that how many threads to use
+ 	 scanf("%d",&NOOFTHREADS);              // taking input from the user 
   	printf("...program getting stared...\n");
     int k;
-    pthread_t progress[NO_OF_P];
+    pthread_t progress[NOOFTHREADS];		// pthreda_t is the data type for thread id
     srand(time(NULL));
-    for(k=0;k<NO_OF_P;k++){
-        if(pthread_create(&progress[k],NULL,display,(void*)&k))  
+    for(k=0;k<NOOFTHREADS;k++){
+        if(pthread_create(&progress[k],NULL,display,(void*)&k))  /*pthread_create is used to create the thread,2 parameters 
+are associated with this function first is the pointer to the function,second is the attributes of the thread like scheduling
+ policy ,priority,here NULL specifies default parameters ,third parameter is the pointer to the function ,fourth is the pointer
+ to the arguments */
+	// In this condition first parameter is progress,second is NULL, third is display,fourth is (void*)&k
+           // return -1*printf("Error There in thread %d!!!\n",k);  //it will show the error int the code  
             return -1*printf("Error in thread %d creation!!!\n",k);    
     }
 
-    for(k=0;k<NO_OF_P;k++)
-        pthread_join(progress[k	],NULL);
-    return 0*puts("\nDONE\n");
+    for(k=0;k<NOOFTHREADS;k++)
+        pthread_join(progress[k],NULL);		// waits for the new thread to finish first
+    return 0*puts("\nDONE\n");			// if the process done sucess fully then it will print done
 }
