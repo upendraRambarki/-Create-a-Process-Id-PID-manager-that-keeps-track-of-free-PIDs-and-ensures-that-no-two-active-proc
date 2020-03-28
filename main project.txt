@@ -1,0 +1,66 @@
+#define MIN_PID 100
+#define MAX_PID 1000
+//#define NO_OF_P 16 
+#define ARR_SIZE MAX_PID-MIN_PID+1
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+int pid_status[ARR_SIZE]={0};
+int allocate_map(void)        
+{
+  int k;
+  for(k=0;k<ARR_SIZE;k++)
+  {
+    pid_status[k]=0;
+  }
+  return 0;               
+}
+int allocate_pid(void)
+{
+    int k,count=1;
+    for(k=0; k<ARR_SIZE; k++)
+
+{
+        if(pid_status[k]==0)
+	{
+        pid_status[k]=1;
+            count=0;
+            break;
+        }
+    }
+    return count?-1:k;
+}
+void release_pid(int pid){  
+    pid_status[pid]=0;
+}
+void *display(void *arg){
+    int thread_id =  *(( int* )arg);
+    int pid = allocate_pid();
+    if(pid==-1){
+        printf("No PID available.");
+    }
+    else{
+        printf("Thread [%3d] PID [%3d] Allocated\n",thread_id,pid+MIN_PID);
+	int r=1+rand()%30;
+	release_pid(pid);
+        printf("Thread [%3d] PID [%3d] Released after %d sec\n",thread_id,pid+MIN_PID,r);    
+    }
+    pthread_exit(NULL);
+}
+int main(){
+	int  NO_OF_P;
+  	printf("Enter no of threads: ");
+ 	 scanf("%d",&NO_OF_P);               
+  	//printf("...program getting stared...\n");
+    int k;
+    pthread_t progress[NO_OF_P];
+    srand(time(NULL));
+    for(k=0;k<NO_OF_P;k++){
+        if(pthread_create(&progress[k],NULL,display,(void*)&k))  
+            return -1*printf("Error in thread %d creation!!!\n",k);    
+    }
+
+    for(k=0;k<NO_OF_P;k++)
+        pthread_join(progress[k	],NULL);
+    return 0*puts("\nDONE\n");
+}
