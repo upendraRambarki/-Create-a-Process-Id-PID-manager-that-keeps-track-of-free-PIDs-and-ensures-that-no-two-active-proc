@@ -51,7 +51,7 @@ int main(){
 	int  NO_OF_P;
   	printf("Enter no of threads: ");
  	 scanf("%d",&NO_OF_P);               
-  	//printf("...program getting stared...\n");
+  	printf("...program getting stared...\n");
     int k;
     pthread_t progress[NO_OF_P];
     srand(time(NULL));
